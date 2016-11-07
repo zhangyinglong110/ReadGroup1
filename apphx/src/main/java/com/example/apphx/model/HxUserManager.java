@@ -124,9 +124,9 @@ public class HxUserManager implements EMConnectionListener {
     private void setCurrentUserId(String hxID) {
         currentUserId = hxID;
         if (hxID == null) {
-            HxContactsManager.getsInstance().reset();
+            HxContactManager.getInstance().reset();
         } else {
-            HxContactsManager.getsInstance().setCurrentUser(hxID);
+            HxContactManager.getInstance().setCurrentUser(hxID);
         }
     }
 

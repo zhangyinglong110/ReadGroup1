@@ -9,7 +9,7 @@ import java.util.List;
 
 public class HxRefreshEvent {
 
-    public List<String> contacts;
+    public final List<String> contacts;
 
     //true 代表联系人 发生了变化
     public final boolean changed;

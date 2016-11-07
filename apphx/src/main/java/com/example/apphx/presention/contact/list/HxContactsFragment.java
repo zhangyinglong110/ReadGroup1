@@ -10,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.Toast;
 
 import com.example.apphx.R;
+import com.example.apphx.presention.chat.HxChatActivity;
 import com.hyphenate.easeui.domain.EaseUser;
 import com.hyphenate.easeui.ui.EaseContactListFragment;
 
@@ -31,6 +32,12 @@ public class HxContactsFragment extends EaseContactListFragment implements HxCon
         hxContactsPresenter = new HxContactsPresenter();
         hxContactsPresenter.atteachView(this);
         hxContactsPresenter.onCreat();
+        setContactListItemClickListener(new EaseContactListItemClickListener() {
+            @Override
+            public void onListItemClicked(EaseUser user) {
+                HxChatActivity.open(getContext(), user.getUsername());
+            }
+        });
     }
 
     @Override

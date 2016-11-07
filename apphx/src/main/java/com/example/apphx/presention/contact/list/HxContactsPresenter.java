@@ -1,7 +1,7 @@
 package com.example.apphx.presention.contact.list;
 
 import com.example.apphx.basemvp.MvpPresenter;
-import com.example.apphx.model.HxContactsManager;
+import com.example.apphx.model.HxContactManager;
 import com.example.apphx.model.event.HxErrorEvent;
 import com.example.apphx.model.event.HxEventType;
 import com.example.apphx.model.event.HxRefreshEvent;
@@ -22,11 +22,11 @@ public class HxContactsPresenter extends MvpPresenter<HxContactsView> {
 
     //---------联系人列表的业务的开始执行----------
     public void loadContacts() {
-        HxContactsManager.getsInstance().getContacts();
+        HxContactManager.getInstance().getContacts();
     }
 
     public void deleteContact(String hxId) {
-        HxContactsManager.getsInstance().asyncDeleteContact(hxId);
+        HxContactManager.getInstance().asyncDeleteContact(hxId);
     }
 
     //---------联系人列表的业务的结束----------

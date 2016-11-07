@@ -1,7 +1,5 @@
 package com.example.apphx.model;
 
-import android.util.Log;
-
 import com.example.apphx.model.event.HxErrorEvent;
 import com.example.apphx.model.event.HxEventType;
 import com.example.apphx.model.event.HxRefreshEvent;
@@ -19,58 +17,82 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import timber.log.Timber;
+
 /**
- * 联系人列表的业务层代码(Model)
- * Created by Administrator on 2016/11/3 0003.
+ * 环信联系人管理
+ * <p/>
+ * MVP的model:主要负责业务处理,且将结果通过EventBus发送到Presenter中去处理
+ * <p/>
+ * 作者：yuanchao on 2016/10/17 0017 10:03
+ * 邮箱：yuanchao@feicuiedu.com
  */
+public class HxContactManager implements EMContactListener, EMConnectionListener {
 
-public class HxContactsManager implements EMContactListener, EMConnectionListener {
+    private static HxContactManager sInstance;
 
-    private static final String TAG = "HxContactsManager";
-
-    private static HxContactsManager sInstance;
-
-    private final EventBus eventBus;
-
-    private final EMContactManager emContactManager;
-
-    private List<String> contacts;
-
-    private String currentUserId;
-
-    private final ExecutorService executorService;
-
-
-    public static HxContactsManager getsInstance() {
+    public static HxContactManager getInstance() {
         if (sInstance == null) {
-            sInstance = new HxContactsManager();
+            sInstance = new HxContactManager();
         }
         return sInstance;
     }
 
-    private HxContactsManager() {
+    private List<String> contacts; // 联系人列表集合
+    private String currentUserId;
+
+    private final EMContactManager emContactManager;
+    private final EventBus eventBus;
+    private final ExecutorService executorService;
+
+
+    private HxContactManager() {
+
+        // EventBus
         eventBus = EventBus.getDefault();
-        emContactManager = EMClient.getInstance().contactManager();
+        // 线程池
         executorService = Executors.newSingleThreadExecutor();
-        emContactManager.setContactListener(this);
+        // 环信连接监听
         EMClient.getInstance().addConnectionListener(this);
+        // 环信联系人相关操作SDK
+        emContactManager = EMClient.getInstance().contactManager();
+        emContactManager.setContactListener(this);
     }
+
+
+    // start-interface: EMConnectionListener
+    @Override
+    public void onConnected() {
+        if (contacts == null) {
+            asyncGetContactsFromServer();
+        }
+    }
+
+    @Override
+    public void onDisconnected(int i) {
+    }// end-interface: EMConnectionListener
 
     /**
      * 获取联系人
      */
     public void getContacts() {
+        // 已获取过联系人(不用重复去获取)
         if (contacts != null) {
             notifyContactsRefresh();
-        } else {
-            notifyContactsRefresh();
+        }
+        // 还未获取过联系人
+        else {
+            asyncGetContactsFromServer();
         }
     }
 
+
     /**
-     * 删除联系人
+     * 删除联系人,如果删除成功，会自己触发{@link #onContactDeleted(String)}
+     * <p/>
+     * 注意：A将B删除了, B客户端的{@link #onContactDeleted(String)}也会触发
      *
-     * @param hxId 根据联系人的ID删除联系人
+     * @param hxId 对方的环信id
      */
     public void asyncDeleteContact(final String hxId) {
         Runnable runnable = new Runnable() {
@@ -79,6 +101,8 @@ public class HxContactsManager implements EMContactListener, EMConnectionListene
                 try {
                     emContactManager.deleteContact(hxId);
                 } catch (HyphenateException e) {
+                    Timber.e(e, "deleteContact");
+                    // 删除失败
                     eventBus.post(new HxErrorEvent(HxEventType.DELETE_CONTACT, e));
                 }
             }
@@ -91,8 +115,12 @@ public class HxContactsManager implements EMContactListener, EMConnectionListene
         this.currentUserId = hxId;
     }
 
+    public void reset() {
+        contacts = null;
+        currentUserId = null;
+    }
 
-    //异步获取联系人列表
+
     private void asyncGetContactsFromServer() {
         Runnable runnable = new Runnable() {
             @Override
@@ -101,17 +129,13 @@ public class HxContactsManager implements EMContactListener, EMConnectionListene
                     contacts = emContactManager.getAllContactsFromServer();
                     notifyContactsRefresh();
                 } catch (HyphenateException e) {
-                    Log.i(TAG, "run: asyncGetContactsFromServer 获取联系人异常 ");
+                    Timber.e(e, "asyncGetContactsFromServer");
                 }
             }
         };
         executorService.submit(runnable);
     }
 
-
-    /**
-     * 刷新数据
-     */
     private void notifyContactsRefresh() {
         List<String> currentContacts;
         if (contacts == null) {
@@ -122,19 +146,11 @@ public class HxContactsManager implements EMContactListener, EMConnectionListene
         eventBus.post(new HxRefreshEvent(currentContacts));
     }
 
-
-    //重置联系人
-    public void reset() {
-
-        contacts = null;
-        currentUserId = null;
-    }
-
-    //------------start Contacts interface----------------
-
-    //添加新的联系人
+    // start contact ContactListener -------------------------
+    // 添加联系人
     @Override
     public void onContactAdded(String hxId) {
+        Timber.d("onContactAdded %s", hxId);
         if (contacts == null) {
             asyncGetContactsFromServer();
         } else {
@@ -146,6 +162,7 @@ public class HxContactsManager implements EMContactListener, EMConnectionListene
     // 删除联系人
     @Override
     public void onContactDeleted(String hxId) {
+        Timber.d("onContactDeleted %s", hxId);
         if (contacts == null) {
             asyncGetContactsFromServer();
         } else {
@@ -154,42 +171,24 @@ public class HxContactsManager implements EMContactListener, EMConnectionListene
         }
     }
 
-    // 接受还有的邀请
+    // 收到好友邀请
     @Override
-    public void onContactInvited(String s, String s1) {
+    public void onContactInvited(String hxId, String reason) {
+        Timber.d("onContactInvited %s, reason: %s", hxId, reason);
+    }
+
+    // 好友请求被同意
+    @Override
+    public void onContactAgreed(String hxId) {
+        Timber.d("onContactAgreed %s", hxId);
 
     }
 
-    //同意联系人的添加
+    // 好友请求被拒绝
     @Override
-    public void onContactAgreed(String s) {
-
+    public void onContactRefused(String hxId) {
+        Timber.d("onContactRefused %s", hxId);
     }
 
-    //拒绝联系人的添加
-    @Override
-    public void onContactRefused(String s) {
-
-    }
-
-    //------------end Contacts interface----------------
-
-
-    //------------start Connection interface----------------
-
-    @Override
-    public void onConnected() {
-        if (contacts == null) {
-            asyncGetContactsFromServer();
-        }
-
-    }
-
-    @Override
-    public void onDisconnected(int i) {
-
-    }
-
-    //------------end Connection interface----------------
-
+    // end contact ContactListener -------------------------
 }
