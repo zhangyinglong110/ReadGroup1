@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.apphx.presention.contact.list.HxContactsFragment;
+import com.example.apphx.presention.conversation.HxConversationFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -78,7 +79,7 @@ public class HomeActivity extends AppCompatActivity implements ViewPager.OnPageC
                 case 1:
                     return new HxContactsFragment();
                 case 2:
-                    return new HxContactsFragment();
+                    return new HxConversationFragment();
                 case 3:
                     return new HxContactsFragment();
                 default:
