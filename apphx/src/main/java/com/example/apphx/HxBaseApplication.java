@@ -4,6 +4,10 @@ import android.app.Application;
 import android.widget.Toast;
 
 import com.example.apphx.model.event.HxDisconnecEvent;
+import com.example.apphx.model.repository.DefaultLocalUserRepo;
+import com.example.apphx.model.repository.ILocalUsersRepo;
+import com.example.apphx.model.repository.IRemoteUserRepo;
+import com.example.apphx.model.repository.MockRemoteUserRepo;
 import com.hyphenate.EMError;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMOptions;
@@ -29,10 +33,19 @@ public abstract class HxBaseApplication extends Application {
     private void initEaseUI() {
         EMOptions options = new EMOptions();
         options.setAutoLogin(false); // 关闭自动登录
-        options.setAcceptInvitationAlways(true); // 自动同意
+        //当设置为true的时候是自动同意好友的添加。改为false的时候是需要好友同意的
+        options.setAcceptInvitationAlways(false); // 自动同意
         EaseUI.getInstance().init(this, options);
         // 关闭环信日志
         EMClient.getInstance().setDebugMode(false);
+        //apphx模块的一个初始化工作
+        initHxModule();
+    }
+
+    protected void initHxModule() {
+        IRemoteUserRepo remoteUserRepo = new MockRemoteUserRepo();
+        ILocalUsersRepo localUsersRepo = DefaultLocalUserRepo.getInstance(this);
+        HxModuleInitializer.getsInstace().init(remoteUserRepo, localUsersRepo);
     }
 
 

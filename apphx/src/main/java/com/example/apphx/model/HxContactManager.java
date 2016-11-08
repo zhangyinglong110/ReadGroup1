@@ -1,12 +1,18 @@
 package com.example.apphx.model;
 
+import android.util.Log;
+
 import com.example.apphx.model.event.HxErrorEvent;
 import com.example.apphx.model.event.HxEventType;
 import com.example.apphx.model.event.HxRefreshEvent;
+import com.example.apphx.model.event.HxSearchContactEvent;
+import com.example.apphx.model.repository.ILocalUsersRepo;
+import com.example.apphx.model.repository.IRemoteUserRepo;
 import com.hyphenate.EMConnectionListener;
 import com.hyphenate.EMContactListener;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMContactManager;
+import com.hyphenate.easeui.domain.EaseUser;
 import com.hyphenate.exceptions.HyphenateException;
 
 import org.greenrobot.eventbus.EventBus;
@@ -44,6 +50,7 @@ public class HxContactManager implements EMContactListener, EMConnectionListener
     private final EMContactManager emContactManager;
     private final EventBus eventBus;
     private final ExecutorService executorService;
+    private static final String TAG = "HxContactManager";
 
 
     private HxContactManager() {
@@ -84,6 +91,50 @@ public class HxContactManager implements EMContactListener, EMConnectionListener
         else {
             asyncGetContactsFromServer();
         }
+    }
+
+    //远程仓库(一般主要指应用的服务器)
+    private IRemoteUserRepo remoteUserRepo;
+    //本地仓库(指的是本地仓库的换粗数据)
+    private ILocalUsersRepo localUsersRepo;
+
+    //初始化远程仓库
+    public HxContactManager initRemoteUserRepo(IRemoteUserRepo remoteUserRepo) {
+        this.remoteUserRepo = remoteUserRepo;
+        return this;
+    }
+
+    //初始化本地仓库的操作
+    public HxContactManager initLocalUserRepo(ILocalUsersRepo localUsersRepo) {
+        this.localUsersRepo = localUsersRepo;
+        return this;
+    }
+
+    /**
+     * 搜索好友功能
+     * </p>
+     * 环信不提供搜索功能，搜索完全由APP和应用服务器实现
+     *
+     * @param uasename
+     */
+    public void asyncSearchContact(final String uasename) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                //上应用服务器获取数据,还没用应用服务器，(到远程用户仓库去取数据)
+                try {
+                    List<EaseUser> user = remoteUserRepo.queryByName(uasename);
+                    //缓存到本地 ，只是知道要缓存(只要见过的用户EaseUser，都应该缓存起来)
+                    localUsersRepo.saveAll(user);
+                    //将结果发送到presenter
+                    eventBus.post(new HxSearchContactEvent(user));
+                } catch (Exception e) {
+                    Log.i(TAG, "asyncSearchContact: error" + e.getMessage());
+                    eventBus.post(new HxSearchContactEvent(e.getMessage()));
+                }
+            }
+        };
+        executorService.submit(runnable);
     }
 
 
