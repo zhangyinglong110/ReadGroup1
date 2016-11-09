@@ -1,5 +1,6 @@
 package com.example.apphx.presention.contact.list;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.ContextMenu;
@@ -11,6 +12,7 @@ import android.widget.Toast;
 
 import com.example.apphx.R;
 import com.example.apphx.presention.chat.HxChatActivity;
+import com.example.apphx.presention.contact.search.HxSearchContactsActivity;
 import com.hyphenate.easeui.domain.EaseUser;
 import com.hyphenate.easeui.ui.EaseContactListFragment;
 
@@ -74,6 +76,15 @@ public class HxContactsFragment extends EaseContactListFragment implements HxCon
         View headerView = LayoutInflater.from(getContext()).inflate(R.layout.partial_hx_contact_list_header, listView, false);
         View addContacts = headerView.findViewById(R.id.layout_add_contacts);
         View notifications = headerView.findViewById(R.id.layout_notifications);
+        // 添加新朋友
+
+        addContacts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), HxSearchContactsActivity.class);
+                startActivity(intent);
+            }
+        });
         listView.addHeaderView(headerView);
     }
 

@@ -46,32 +46,48 @@
         <!-- 聊天页面 -->
         <activity
             android:name=".presention.chat.HxChatActivity"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait"></activity>
 
         <!-- 显示下载大图页面 -->
         <activity
             android:name="com.hyphenate.easeui.ui.EaseShowBigImageActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/horizontal_slide"/>
+            android:theme="@style/horizontal_slide" />
 
         <!-- *********地图相关功能:开始********* -->
         <!-- 地图页面，用于分享位置 -->
         <activity
             android:name="com.hyphenate.easeui.ui.EaseBaiduMapActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/HxAppTheme"/>
+            android:theme="@style/HxAppTheme" />
 
         <!-- 百度地图所需的service -->
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
-            android:process=":remote"/>
+            android:process=":remote" />
 
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
-            android:value="P1IAcH7dXxo4P6dFwxkeEb0KHNBdi2Sf"/>
+            android:value="P1IAcH7dXxo4P6dFwxkeEb0KHNBdi2Sf" />
         <!-- *********地图相关功能:结束********* -->
+
+        <!-- 搜索联系人页面 -->
+        <activity android:name=".presention.contact.search.HxSearchContactsActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/HxSearchTheme">
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/searchable"/>
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH"/>
+            </intent-filter>
+        </activity>
+        <!-- 搜索建议内容提供者 -->
+        <provider
+            android:name=".presention.contact.search.HxSearchContactsProvider"
+            android:authorities="@string/hx_contact_search_provider_authority"
+            android:exported="false" />
     </application>
 
 </manifest>
