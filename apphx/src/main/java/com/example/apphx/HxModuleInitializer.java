@@ -1,6 +1,7 @@
 package com.example.apphx;
 
 import com.example.apphx.model.HxContactManager;
+import com.example.apphx.model.repository.ILocalInviteRepo;
 import com.example.apphx.model.repository.ILocalUsersRepo;
 import com.example.apphx.model.repository.IRemoteUserRepo;
 
@@ -32,9 +33,10 @@ public class HxModuleInitializer {
      * @param remoteUserRepo
      * @param localUsersRepo
      */
-    public void init(IRemoteUserRepo remoteUserRepo, ILocalUsersRepo localUsersRepo) {
+    public void init(IRemoteUserRepo remoteUserRepo, ILocalUsersRepo localUsersRepo, ILocalInviteRepo inviteRepo) {
         HxContactManager.getInstance()
                 .initRemoteUserRepo(remoteUserRepo)
-                .initLocalUserRepo(localUsersRepo);
+                .initLocalUserRepo(localUsersRepo)
+                .initLoacalInviteRepo(inviteRepo);
     }
 }

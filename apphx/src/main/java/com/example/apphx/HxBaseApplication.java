@@ -4,7 +4,9 @@ import android.app.Application;
 import android.widget.Toast;
 
 import com.example.apphx.model.event.HxDisconnecEvent;
+import com.example.apphx.model.repository.DefaultLocalInviteRepo;
 import com.example.apphx.model.repository.DefaultLocalUserRepo;
+import com.example.apphx.model.repository.ILocalInviteRepo;
 import com.example.apphx.model.repository.ILocalUsersRepo;
 import com.example.apphx.model.repository.IRemoteUserRepo;
 import com.example.apphx.model.repository.MockRemoteUserRepo;
@@ -45,7 +47,8 @@ public abstract class HxBaseApplication extends Application {
     protected void initHxModule() {
         IRemoteUserRepo remoteUserRepo = new MockRemoteUserRepo();
         ILocalUsersRepo localUsersRepo = DefaultLocalUserRepo.getInstance(this);
-        HxModuleInitializer.getsInstace().init(remoteUserRepo, localUsersRepo);
+        ILocalInviteRepo iLocalInviteRepo = DefaultLocalInviteRepo.getsInstace(this);
+        HxModuleInitializer.getsInstace().init(remoteUserRepo, localUsersRepo, iLocalInviteRepo);
     }
 
 

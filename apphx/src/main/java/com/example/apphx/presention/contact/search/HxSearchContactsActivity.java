@@ -208,7 +208,6 @@ public class HxSearchContactsActivity extends AppCompatActivity implements HxSea
         listView = easeContactList.getListView();
 
 
-
         contactList = new ArrayList<>();
         easeContactList.init(contactList);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -230,7 +229,7 @@ public class HxSearchContactsActivity extends AppCompatActivity implements HxSea
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getItemId() == R.id.menu_add_contact) {
                     // 执行邀请业务
-//                    presenter.sendInvite(easeUser.getUsername());
+                    presenter.sendInvite(easeUser.getUsername());
                     return true;
                 }
                 return false;
