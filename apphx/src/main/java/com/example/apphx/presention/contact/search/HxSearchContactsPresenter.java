@@ -53,6 +53,7 @@ public class HxSearchContactsPresenter extends MvpPresenter<HxSearchContactsView
     }
 
 
+    //----------搜索好友的事件--------------------
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(HxSearchContactEvent event) {
         getView().stopLoading();
@@ -67,8 +68,10 @@ public class HxSearchContactsPresenter extends MvpPresenter<HxSearchContactsView
             getView().showSearchError(event.errorMeassage);
         }
     }
+    //----------搜索好友的事件--------------------
 
 
+    //--------------发送好友邀请的事件--------------------
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(HxSimpleEvent e) {
         if (e.type != HxEventType.SEND_INVITE) return;
@@ -82,4 +85,7 @@ public class HxSearchContactsPresenter extends MvpPresenter<HxSearchContactsView
         getView().stopLoading();
         getView().showSendInvaiteResult(false);
     }
+
+
+    //-------------好友邀请的事件--------------------
 }

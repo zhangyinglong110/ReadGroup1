@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.example.apphx.presention.contact.list.HxContactsFragment;
 import com.example.apphx.presention.conversation.HxConversationFragment;
+import com.example.readgroup.presentation.book.BooksFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -75,7 +76,7 @@ public class HomeActivity extends AppCompatActivity implements ViewPager.OnPageC
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return new HxContactsFragment();
+                    return new BooksFragment();
                 case 1:
                     return new HxContactsFragment();
                 case 2:

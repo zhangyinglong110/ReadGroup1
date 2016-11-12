@@ -157,6 +157,7 @@ public class HxContactManager implements EMContactListener, EMConnectionListener
      * @param hxId
      */
     public void asyncSendInvite(final String hxId) {
+        Log.i(TAG, "asyncSendInvite: ------------------" + hxId);
         final EaseUser easeUser = localUsersRepo.getUser(currentUserId);
         Runnable runnable = new Runnable() {
             @Override
@@ -327,6 +328,7 @@ public class HxContactManager implements EMContactListener, EMConnectionListener
      */
     private void notifyInviteRefresh() {
         List<InviteMessage> message = localInviteRepo.getAll();
+        Log.i(TAG, "notifyInviteRefresh: -----------" + message.size());
         eventBus.post(new HxRefreshInviteEvent(message));
     }
 

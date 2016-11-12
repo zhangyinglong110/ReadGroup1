@@ -26,7 +26,7 @@
         <!-- 设置环信应用的AppKey -->
         <meta-data
             android:name="EASEMOB_APPKEY"
-            android:value="775846413#huanxindemo" />
+            android:value="775846413#readgroup" />
         <!-- 声明环信所需的service SDK核心功能 -->
         <service
             android:name="com.hyphenate.chat.EMChatService"
@@ -73,14 +73,16 @@
         <!-- *********地图相关功能:结束********* -->
 
         <!-- 搜索联系人页面 -->
-        <activity android:name=".presention.contact.search.HxSearchContactsActivity"
+        <activity
+            android:name=".presention.contact.search.HxSearchContactsActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/HxSearchTheme">
-            <meta-data android:name="android.app.searchable"
-                android:resource="@xml/searchable"/>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
             <intent-filter>
-                <action android:name="android.intent.action.SEARCH"/>
+                <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
         </activity>
         <!-- 搜索建议内容提供者 -->
@@ -88,6 +90,8 @@
             android:name=".presention.contact.search.HxSearchContactsProvider"
             android:authorities="@string/hx_contact_search_provider_authority"
             android:exported="false" />
+
+        <activity android:name=".presention.contact.invitation.HxInvitationsActivity"></activity>
     </application>
 
 </manifest>

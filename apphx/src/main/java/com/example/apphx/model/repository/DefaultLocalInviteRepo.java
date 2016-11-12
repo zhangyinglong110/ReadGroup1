@@ -46,38 +46,50 @@ public class DefaultLocalInviteRepo implements ILocalInviteRepo {
     @Override
     public void setCurrentUser(String hxId) {
         this.currentUserId = hxId;
+
         if (hxId == null) {
             this.preferences = null;
             return;
         }
-        this.preferences = context.getSharedPreferences(PREF_HX_INVITE_MESSAGE_NAME_, Context.MODE_PRIVATE);
+
+        this.preferences = context.getSharedPreferences(PREF_HX_INVITE_MESSAGE_NAME_ + hxId, Context.MODE_PRIVATE);
     }
 
     @Override
     public void save(InviteMessage message) {
         if (currentUserId == null || !currentUserId.equals(message.getToHxId())) {
-            throw new RuntimeException("当前用户出错：" + currentUserId);
-        } else {
-            preferences.edit().putString(message.getFormId(), gson.toJson(message)).commit();
+            throw new RuntimeException("Wrong current user: " + currentUserId);
         }
+
+        preferences.edit()
+                .putString(message.getFormId(), gson.toJson(message))
+                .commit();
     }
 
     @Override
     public void delete(String fromHxId) {
+
         if (currentUserId == null) {
-            throw new RuntimeException("不是当前用户！");
+            throw new RuntimeException("No current user!");
         }
-        preferences.edit().remove(fromHxId).commit();
+
+        preferences.edit()
+                .remove(fromHxId)
+                .commit();
+
     }
 
     @NonNull
     @Override
     public List<InviteMessage> getAll() {
         if (currentUserId == null) {
-            throw new RuntimeException("不是当前用户！");
+            throw new RuntimeException("No current user!");
         }
+
         Map<String, ?> map = preferences.getAll();
+
         ArrayList<InviteMessage> messages = new ArrayList<>();
+
         for (Map.Entry<String, ?> entry : map.entrySet()) {
             InviteMessage inviteMessage = gson.fromJson(entry.getValue().toString(), InviteMessage.class);
             messages.add(inviteMessage);

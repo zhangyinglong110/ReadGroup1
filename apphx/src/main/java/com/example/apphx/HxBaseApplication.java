@@ -36,7 +36,7 @@ public abstract class HxBaseApplication extends Application {
         EMOptions options = new EMOptions();
         options.setAutoLogin(false); // 关闭自动登录
         //当设置为true的时候是自动同意好友的添加。改为false的时候是需要好友同意的
-        options.setAcceptInvitationAlways(false); // 自动同意
+        options.setAcceptInvitationAlways(true); // 自动同意
         EaseUI.getInstance().init(this, options);
         // 关闭环信日志
         EMClient.getInstance().setDebugMode(false);

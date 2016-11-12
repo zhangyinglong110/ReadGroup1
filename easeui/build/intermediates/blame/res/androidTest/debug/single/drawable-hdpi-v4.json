@@ -232,12 +232,12 @@
         "source": "E:\\androidstudio\\ReadGroup\\easeui\\build\\intermediates\\bundles\\debug\\res\\drawable-hdpi-v4\\ease_type_select_btn_nor.png"
     },
     {
-        "merged": "E:\\androidstudio\\ReadGroup\\easeui\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-hdpi-v4\\ee_8.png",
-        "source": "E:\\androidstudio\\ReadGroup\\easeui\\build\\intermediates\\bundles\\debug\\res\\drawable-hdpi-v4\\ee_8.png"
-    },
-    {
         "merged": "E:\\androidstudio\\ReadGroup\\easeui\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-hdpi-v4\\ee_27.png",
         "source": "E:\\androidstudio\\ReadGroup\\easeui\\build\\intermediates\\bundles\\debug\\res\\drawable-hdpi-v4\\ee_27.png"
+    },
+    {
+        "merged": "E:\\androidstudio\\ReadGroup\\easeui\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-hdpi-v4\\ee_8.png",
+        "source": "E:\\androidstudio\\ReadGroup\\easeui\\build\\intermediates\\bundles\\debug\\res\\drawable-hdpi-v4\\ee_8.png"
     },
     {
         "merged": "E:\\androidstudio\\ReadGroup\\easeui\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-hdpi-v4\\ease_chatting_setmode_voice_btn_normal.png",

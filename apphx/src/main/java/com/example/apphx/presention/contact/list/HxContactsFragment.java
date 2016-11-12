@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.example.apphx.R;
 import com.example.apphx.presention.chat.HxChatActivity;
+import com.example.apphx.presention.contact.invitation.HxInvitationsActivity;
 import com.example.apphx.presention.contact.search.HxSearchContactsActivity;
 import com.hyphenate.easeui.domain.EaseUser;
 import com.hyphenate.easeui.ui.EaseContactListFragment;
@@ -74,10 +75,9 @@ public class HxContactsFragment extends EaseContactListFragment implements HxCon
         hideTitleBar();
         registerForContextMenu(listView);
         View headerView = LayoutInflater.from(getContext()).inflate(R.layout.partial_hx_contact_list_header, listView, false);
-        View addContacts = headerView.findViewById(R.id.layout_add_contacts);
-        View notifications = headerView.findViewById(R.id.layout_notifications);
-        // 添加新朋友
 
+        // 添加新朋友
+        View addContacts = headerView.findViewById(R.id.layout_add_contacts);
         addContacts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -85,6 +85,17 @@ public class HxContactsFragment extends EaseContactListFragment implements HxCon
                 startActivity(intent);
             }
         });
+
+        // 邀请和通知
+        View notifications = headerView.findViewById(R.id.layout_notifications);
+        notifications.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), HxInvitationsActivity.class);
+                startActivity(intent);
+            }
+        });
+
         listView.addHeaderView(headerView);
     }
 

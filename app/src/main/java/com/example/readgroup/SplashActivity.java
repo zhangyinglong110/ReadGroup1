@@ -6,8 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
 
 import com.example.apphx.model.HxUserManager;
-import com.example.readgroup.user.login.LoginFragment;
-import com.example.readgroup.user.register.RegisterFragment;
+import com.example.readgroup.presentation.user.login.LoginFragment;
+import com.example.readgroup.presentation.user.register.RegisterFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
