@@ -153,4 +153,8 @@ public class HxUserManager implements EMConnectionListener {
         };
         executorService.submit(runnable);
     }
+
+    public String getCurrentUserId() {
+        return currentUserId;
+    }
 }

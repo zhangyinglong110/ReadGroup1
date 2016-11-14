@@ -1,4 +1,4 @@
-package com.example.readgroup.presentation.book;
+package com.example.readgroup.presentation.book.booklist;
 
 import android.view.LayoutInflater;
 import android.view.View;

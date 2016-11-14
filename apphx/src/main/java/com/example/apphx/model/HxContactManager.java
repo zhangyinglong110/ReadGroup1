@@ -244,6 +244,9 @@ public class HxContactManager implements EMContactListener, EMConnectionListener
         return contacts != null && contacts.contains(hxId);
     }
 
+    public boolean isContact(String hxId) {
+        return contacts != null && contacts.contains(hxId);
+    }
 
     /**
      * 从服务器获取联系人

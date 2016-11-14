@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.example.apphx.presention.contact.list.HxContactsFragment;
 import com.example.apphx.presention.conversation.HxConversationFragment;
-import com.example.readgroup.presentation.book.BooksFragment;
+import com.example.readgroup.presentation.book.booklist.BooksFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
