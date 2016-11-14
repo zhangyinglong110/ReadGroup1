@@ -21,6 +21,8 @@ public interface BombConst {
 
     // Note: 服务器有1分钟的数据缓存，如果连续两次请求参数一样，下次请求会返回缓存数据
     String BOOKS_URL = "http://cloud.bmob.cn/5a3f440fff51573e/books?time=%s";
+    //获取书籍的一个详情数据
+    String BOOK_INFO_URL = "http://cloud.bmob.cn/5a3f440fff51573e/getBookInfo?bookId=%s&time=%s";
 
 
 }

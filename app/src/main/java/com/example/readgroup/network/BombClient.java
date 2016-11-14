@@ -1,6 +1,8 @@
 package com.example.readgroup.network;
 
+import com.example.readgroup.network.entity.BookInfoResult;
 import com.example.readgroup.network.entity.BookResult;
+import com.example.readgroup.network.event.GetBookInfoEvenet;
 import com.example.readgroup.network.event.GetBooksEvent;
 import com.google.gson.Gson;
 
@@ -78,6 +80,34 @@ public class BombClient implements BombConst {
         });
     }
 
+    /**
+     * 点击后异步获取图书的一个详情
+     *
+     * @param objectId
+     */
+    public void asyncGetBookInfo(String objectId) {
+        Call call = getBooksDtialCall(objectId);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                GetBookInfoEvenet event = new GetBookInfoEvenet(e.getMessage());
+                eventBus.post(event);
+            }
+
+            @Override
+
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    handleFailedReponse(response);
+                }
+                BookInfoResult bookInfoResult = handleSuccessResponse(response, BookInfoResult.class);
+                GetBookInfoEvenet evenet = new GetBookInfoEvenet(bookInfoResult.getData().getLikes(),
+                        bookInfoResult.getData().getBook());
+                eventBus.post(evenet);
+            }
+        });
+    }
+
 
     /**
      * 图书列表的首页
@@ -91,6 +121,21 @@ public class BombClient implements BombConst {
                 .url(url)
                 .build();
         return okhhtClinet.newCall(requst);
+    }
+
+
+    /**
+     * 图书详情
+     *
+     * @return
+     */
+    public Call getBooksDtialCall(String objectId) {
+        String url = String.format(BOOK_INFO_URL, objectId, System.currentTimeMillis());
+        Request request = new Request
+                .Builder()
+                .url(url)
+                .build();
+        return okhhtClinet.newCall(request);
     }
 
 
