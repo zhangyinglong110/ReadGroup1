@@ -20,4 +20,9 @@ public class UserEntity {
     public String getAvatar() {
         return avatar;
     }
+
+    @Override
+    public String toString() {
+        return username + ":" + objectId + ":" + avatar;
+    }
 }

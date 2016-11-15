@@ -1,9 +1,15 @@
 package com.example.readgroup.presentation.book.bookinfo;
 
 import com.example.apphx.basemvp.MvpPresenter;
+import com.example.apphx.model.HxContactManager;
 import com.example.apphx.model.HxUserManager;
+import com.example.apphx.model.event.HxErrorEvent;
+import com.example.apphx.model.event.HxEventType;
+import com.example.apphx.model.event.HxSimpleEvent;
 import com.example.readgroup.network.BombClient;
+import com.example.readgroup.network.entity.BookEntity;
 import com.example.readgroup.network.entity.UserEntity;
+import com.example.readgroup.network.event.ChangeLikeEvent;
 import com.example.readgroup.network.event.GetBookInfoEvenet;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -34,26 +40,79 @@ public class BookInfoPresenter extends MvpPresenter<BookInfoView> {
         BombClient.getsInstance().asyncGetBookInfo(bookId);
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(GetBookInfoEvenet event) {
-        getView().setRefreshing(false);
+    /**
+     * 加入收藏或者取消收藏
+     */
+    public void changeLike(BookEntity entity, boolean isLike) {
+        getView().setRefreshing(true);
         String userId = HxUserManager.getInstance().getCurrentUserId();
+        BombClient.getsInstance()
+                .asyncChangLike(isLike, entity, userId);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(ChangeLikeEvent event){
+        if (event.success) {
+
+
+            getView().showLikeActionSuccess(event.isLike);
+            BombClient.getsInstance()
+                    .asyncGetBookInfo(event.bookEntity.getObjectId());
+        } else {
+            getView().setRefreshing(false);
+            getView().showLikeActionFail(event.isLike, event.errorMessage);
+        }
+    }
+
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(GetBookInfoEvenet event){
+
+        getView().setRefreshing(false);
+
+        String userId = HxUserManager.getInstance().getCurrentUserId();
+
         if (event.success) {
             getView().showBookInfo(event.book, event.likes);
+
+
             if (event.likes == null) {
                 getView().toggleLike(false);
                 return;
             }
 
             boolean hasUser = false;
+
             for (UserEntity userEntity : event.likes) {
-                hasUser = true;
-                break;
+                if (userId.equals(userEntity.getObjectId())) {
+                    hasUser = true;
+                    break;
+                }
             }
+
             getView().toggleLike(!hasUser);
         } else {
             getView().showGetBookInfoFail(event.errorMessage);
         }
+    }
+
+
+    public void sendInvite(String toHxId) {
+
+        HxContactManager.getInstance()
+                .asyncSendInvite(toHxId);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(HxSimpleEvent e) {
+        if (e.type != HxEventType.SEND_INVITE) return;
+        getView().showSendInviteResult(true);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(HxErrorEvent e) {
+        if (e.type != HxEventType.SEND_INVITE) return;
+        getView().showSendInviteResult(false);
     }
 
 }

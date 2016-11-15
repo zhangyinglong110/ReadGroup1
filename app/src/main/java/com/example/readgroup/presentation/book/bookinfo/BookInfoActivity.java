@@ -8,7 +8,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -44,6 +47,7 @@ public class BookInfoActivity extends AppCompatActivity implements BookInfoView 
     private LikesAdapter likesAdapter;
     private BookHeaderHolder bookHeaderHolder;
     private int menuId;
+    private static final String TAG = "BookInfoActivity";
 
     public static Intent getStartIntent(Context context, BookEntity bookEntity) {
         Gson gson = new Gson();
@@ -80,7 +84,7 @@ public class BookInfoActivity extends AppCompatActivity implements BookInfoView 
         likesAdapter = new LikesAdapter(new LikesAdapter.OnInviteContactListener() {
             @Override
             public void onInvite(@NonNull UserEntity userEntity) {
-
+                presenter.sendInvite(userEntity.getObjectId());
             }
         });
         listLikes.setAdapter(likesAdapter);
@@ -107,12 +111,43 @@ public class BookInfoActivity extends AppCompatActivity implements BookInfoView 
         presenter.onDestory();
     }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (menuId != 0) {
+            getMenuInflater().inflate(menuId, menu);
+            return true;
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                break;
+            case R.id.menu_like:
+                presenter.changeLike(bookEntity, true);
+                break;
+            case R.id.menu_dislike:
+                presenter.changeLike(bookEntity, false);
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+        return true;
+    }
+
     //-----------------------Start 视图层的开始--------------------------------------
     @Override
     public void showBookInfo(BookEntity bookEntity, List<UserEntity> likes) {
         //设置试图上的数据。然后Model层会在数据返回的时候调用
         getSupportActionBar().setTitle(bookEntity.getTitle());
         bookHeaderHolder.bind(bookEntity);
+        Log.i(TAG, "showBookInfo: ---" + likes);
         likesAdapter.setData(likes);
     }
 
@@ -129,6 +164,7 @@ public class BookInfoActivity extends AppCompatActivity implements BookInfoView 
 
     @Override
     public void toggleLike(boolean showLike) {
+        Log.i(TAG, "toggleLike: ----" + showLike);
         menuId = showLike ? R.menu.activity_menu_info_like : R.menu.activity_menu_info_dislike;
         invalidateOptionsMenu();
     }

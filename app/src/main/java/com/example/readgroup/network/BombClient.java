@@ -1,7 +1,12 @@
 package com.example.readgroup.network;
 
+import android.util.Log;
+
+import com.example.readgroup.network.entity.BookEntity;
 import com.example.readgroup.network.entity.BookInfoResult;
 import com.example.readgroup.network.entity.BookResult;
+import com.example.readgroup.network.entity.LikeResult;
+import com.example.readgroup.network.event.ChangeLikeEvent;
 import com.example.readgroup.network.event.GetBookInfoEvenet;
 import com.example.readgroup.network.event.GetBooksEvent;
 import com.google.gson.Gson;
@@ -25,6 +30,7 @@ import timber.log.Timber;
 public class BombClient implements BombConst {
 
     private static BombClient sInstance;
+    private static final String TAG = "BombClient";
 
     public static BombClient getsInstance() {
         if (sInstance == null) {
@@ -72,7 +78,6 @@ public class BombClient implements BombConst {
                 if (!response.isSuccessful()) {
                     handleFailedReponse(response);
                 }
-
                 BookResult bookResult = handleSuccessResponse(response, BookResult.class);
                 GetBooksEvent event = new GetBooksEvent(true, bookResult.getError(), bookResult.getData());
                 eventBus.post(event);
@@ -103,7 +108,35 @@ public class BombClient implements BombConst {
                 BookInfoResult bookInfoResult = handleSuccessResponse(response, BookInfoResult.class);
                 GetBookInfoEvenet evenet = new GetBookInfoEvenet(bookInfoResult.getData().getLikes(),
                         bookInfoResult.getData().getBook());
+                Log.i(TAG, "onResponse: ------" + bookInfoResult.getData().getLikes().size());
+                Log.i(TAG, "onResponse: ------" + bookInfoResult.getData().getLikes().toString());
                 eventBus.post(evenet);
+            }
+        });
+    }
+
+    public void asyncChangLike(final boolean isLike, final BookEntity bookEntity, final String userId) {
+        Call call = getBookLikeCall(bookEntity.getObjectId(), userId, isLike);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                ChangeLikeEvent event = new ChangeLikeEvent(isLike, e.getMessage());
+                eventBus.post(event);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    handleFailedReponse(response);
+                }
+                LikeResult likeResult = handleSuccessResponse(response, LikeResult.class);
+                ChangeLikeEvent event;
+                if (likeResult.isSuccess()) {
+                    event = new ChangeLikeEvent(isLike, bookEntity);
+                } else {
+                    event = new ChangeLikeEvent(isLike, likeResult.getError());
+                }
+                eventBus.post(event);
             }
         });
     }
@@ -131,6 +164,25 @@ public class BombClient implements BombConst {
      */
     public Call getBooksDtialCall(String objectId) {
         String url = String.format(BOOK_INFO_URL, objectId, System.currentTimeMillis());
+        Request request = new Request
+                .Builder()
+                .url(url)
+                .build();
+        Log.i(TAG, "getBooksDtialCall: -------------:" + url);
+        return okhhtClinet.newCall(request);
+    }
+
+    /**
+     * 加入收藏或者取消收藏的
+     *
+     * @param bookId
+     * @param userId
+     * @param isLike
+     * @return
+     */
+    public Call getBookLikeCall(String bookId, String userId, boolean isLike) {
+        String action = isLike ? "like" : "dislike";
+        String url = String.format(BOOK_LIKE_URL, bookId, userId, action);
         Request request = new Request
                 .Builder()
                 .url(url)

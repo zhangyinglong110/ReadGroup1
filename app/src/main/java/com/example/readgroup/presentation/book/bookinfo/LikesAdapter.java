@@ -32,8 +32,8 @@ public class LikesAdapter extends BaseAdapter {
     private final OnInviteContactListener listener;
 
     public LikesAdapter(OnInviteContactListener listener) {
-        this.listener = listener;
         likes = new ArrayList<>();
+        this.listener = listener;
     }
 
     @Override
@@ -53,11 +53,12 @@ public class LikesAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+
         View itemView = (convertView != null) ? convertView : createItemView(parent);
 
-        ViewHolder viewHodler = (ViewHolder) itemView.getTag();
+        ViewHolder viewHolder = (ViewHolder) itemView.getTag();
 
-        viewHodler.bind(getItem(position));
+        viewHolder.bind(getItem(position));
 
         return itemView;
     }
@@ -65,11 +66,11 @@ public class LikesAdapter extends BaseAdapter {
     /**
      * 给适配器设置数据
      *
-     * @param likes
+     * @param data
      */
-    public void setData(List<UserEntity> likes) {
+    public void setData(List<UserEntity> data) {
         likes.clear();
-        likes.addAll(likes);
+        likes.addAll(data);
         notifyDataSetChanged();
     }
 

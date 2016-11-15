@@ -23,6 +23,8 @@ public interface BombConst {
     String BOOKS_URL = "http://cloud.bmob.cn/5a3f440fff51573e/books?time=%s";
     //获取书籍的一个详情数据
     String BOOK_INFO_URL = "http://cloud.bmob.cn/5a3f440fff51573e/getBookInfo?bookId=%s&time=%s";
+    //收藏和取消收藏书籍
+    String BOOK_LIKE_URL = " http://cloud.bmob.cn/5a3f440fff51573e/changeLike?bookId=%s&userId=%s&action=%s";
 
 
 }
