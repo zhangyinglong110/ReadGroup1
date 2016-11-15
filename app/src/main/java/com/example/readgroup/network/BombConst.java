@@ -25,6 +25,8 @@ public interface BombConst {
     String BOOK_INFO_URL = "http://cloud.bmob.cn/5a3f440fff51573e/getBookInfo?bookId=%s&time=%s";
     //收藏和取消收藏书籍
     String BOOK_LIKE_URL = " http://cloud.bmob.cn/5a3f440fff51573e/changeLike?bookId=%s&userId=%s&action=%s";
+    //上传文件
+    String UPLOAD_FILE_URL = "https://api.bmob.cn/2/files/avatar.jpeg";
 
 
 }

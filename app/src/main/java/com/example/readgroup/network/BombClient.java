@@ -13,12 +13,15 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.File;
 import java.io.IOException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import timber.log.Timber;
@@ -60,6 +63,7 @@ public class BombClient implements BombConst {
                 .build();
     }
 
+    //------------------START-首页数据---------------------------------------------------------------
 
     /**
      * 异步去获取首页列表的一个数据
@@ -84,6 +88,25 @@ public class BombClient implements BombConst {
             }
         });
     }
+
+    /**
+     * 图书列表的首页
+     *
+     * @return
+     */
+    public Call getBooksCall() {
+        String url = String.format(BOOKS_URL, System.currentTimeMillis());
+        Request requst = new Request
+                .Builder()
+                .url(url)
+                .build();
+        return okhhtClinet.newCall(requst);
+    }
+
+    //------------------END-首页数据-----------------------------------------------------------------
+
+
+    //------------------START图书详情----------------------------------------------------------------
 
     /**
      * 点击后异步获取图书的一个详情
@@ -115,6 +138,25 @@ public class BombClient implements BombConst {
         });
     }
 
+
+    /**
+     * 图书详情
+     *
+     * @return
+     */
+    public Call getBooksDtialCall(String objectId) {
+        String url = String.format(BOOK_INFO_URL, objectId, System.currentTimeMillis());
+        Request request = new Request
+                .Builder()
+                .url(url)
+                .build();
+        Log.i(TAG, "getBooksDtialCall: -------------:" + url);
+        return okhhtClinet.newCall(request);
+    }
+    //------------------END图书详情----------------------------------------------------------------
+
+
+    //---------------------START-----加入收藏或者取消收藏的-------------------------
     public void asyncChangLike(final boolean isLike, final BookEntity bookEntity, final String userId) {
         Call call = getBookLikeCall(bookEntity.getObjectId(), userId, isLike);
         call.enqueue(new Callback() {
@@ -143,36 +185,6 @@ public class BombClient implements BombConst {
 
 
     /**
-     * 图书列表的首页
-     *
-     * @return
-     */
-    public Call getBooksCall() {
-        String url = String.format(BOOKS_URL, System.currentTimeMillis());
-        Request requst = new Request
-                .Builder()
-                .url(url)
-                .build();
-        return okhhtClinet.newCall(requst);
-    }
-
-
-    /**
-     * 图书详情
-     *
-     * @return
-     */
-    public Call getBooksDtialCall(String objectId) {
-        String url = String.format(BOOK_INFO_URL, objectId, System.currentTimeMillis());
-        Request request = new Request
-                .Builder()
-                .url(url)
-                .build();
-        Log.i(TAG, "getBooksDtialCall: -------------:" + url);
-        return okhhtClinet.newCall(request);
-    }
-
-    /**
      * 加入收藏或者取消收藏的
      *
      * @param bookId
@@ -186,6 +198,42 @@ public class BombClient implements BombConst {
         Request request = new Request
                 .Builder()
                 .url(url)
+                .build();
+        return okhhtClinet.newCall(request);
+    }
+
+
+    //---------------------END-----加入收藏或者取消收藏的-------------------------
+
+
+    public void asyncUploadFile(File file) {
+        Call call = getUploadFileCall(file);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+            }
+        });
+    }
+
+
+    /**
+     * 上传文件的业务
+     *
+     * @param file
+     * @return
+     */
+    public Call getUploadFileCall(File file) {
+        RequestBody body = RequestBody.create(MediaType.parse("image/jpeg"), file);
+        Request request = new Request
+                .Builder()
+                .url(UPLOAD_FILE_URL)
+                .post(body)
                 .build();
         return okhhtClinet.newCall(request);
     }
