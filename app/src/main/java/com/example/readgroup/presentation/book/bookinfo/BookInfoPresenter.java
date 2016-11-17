@@ -1,5 +1,6 @@
 package com.example.readgroup.presentation.book.bookinfo;
 
+
 import com.example.apphx.basemvp.MvpPresenter;
 import com.example.apphx.model.HxContactManager;
 import com.example.apphx.model.HxUserManager;
@@ -15,43 +16,27 @@ import com.example.readgroup.network.event.GetBookInfoEvenet;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-/**
- * Created by Administrator on 2016/11/14 0014.
- */
-
-public class BookInfoPresenter extends MvpPresenter<BookInfoView> {
+class BookInfoPresenter extends MvpPresenter<BookInfoView> {
 
 
-    @Override
-    public BookInfoView getNullObject() {
-        return BookInfoView.NULL;
-    }
-
-    /**
-     * 获取图书详情
-     *
-     * @param bookId
-     * @param triggerByUser
-     */
     public void getBookInfo(String bookId, boolean triggerByUser) {
         if (!triggerByUser) {
             getView().setRefreshing(true);
         }
-        BombClient.getsInstance().asyncGetBookInfo(bookId);
+        BombClient.getsInstance()
+                .asyncGetBookInfo(bookId);
     }
 
-    /**
-     * 加入收藏或者取消收藏
-     */
-    public void changeLike(BookEntity entity, boolean isLike) {
+    public void changeLike(BookEntity bookEntity, boolean isLike) {
+
         getView().setRefreshing(true);
         String userId = HxUserManager.getInstance().getCurrentUserId();
         BombClient.getsInstance()
-                .asyncChangLike(isLike, entity, userId);
+                .asyncChangLike(isLike, bookEntity, userId);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(ChangeLikeEvent event){
+    public void onEvent(ChangeLikeEvent event) {
         if (event.success) {
 
 
@@ -64,9 +49,8 @@ public class BookInfoPresenter extends MvpPresenter<BookInfoView> {
         }
     }
 
-
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(GetBookInfoEvenet event){
+    public void onEvent(GetBookInfoEvenet event) {
 
         getView().setRefreshing(false);
 
@@ -96,7 +80,6 @@ public class BookInfoPresenter extends MvpPresenter<BookInfoView> {
         }
     }
 
-
     public void sendInvite(String toHxId) {
 
         HxContactManager.getInstance()
@@ -115,4 +98,8 @@ public class BookInfoPresenter extends MvpPresenter<BookInfoView> {
         getView().showSendInviteResult(false);
     }
 
+    @Override
+    public BookInfoView getNullObject() {
+        return BookInfoView.NULL;
+    }
 }

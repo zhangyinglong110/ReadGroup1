@@ -88,7 +88,7 @@ public class HxContactManager implements EMContactListener, EMConnectionListener
     /**
      * 获取联系人
      */
-    public void getContacts() {
+    public void retrieveContacts() {
         // 已获取过联系人(不用重复去获取)
         if (contacts != null) {
             notifyContactsRefresh();
@@ -97,6 +97,10 @@ public class HxContactManager implements EMContactListener, EMConnectionListener
         else {
             asyncGetContactsFromServer();
         }
+    }
+
+    List<String> getContacts() {
+        return contacts;
     }
 
     /**

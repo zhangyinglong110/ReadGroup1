@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.example.apphx.presention.contact.list.HxContactsFragment;
 import com.example.apphx.presention.conversation.HxConversationFragment;
 import com.example.readgroup.presentation.book.booklist.BooksFragment;
+import com.example.readgroup.presentation.user.user.UserFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -82,7 +83,7 @@ public class HomeActivity extends AppCompatActivity implements ViewPager.OnPageC
                 case 2:
                     return new HxConversationFragment();
                 case 3:
-                    return new HxContactsFragment();
+                    return new UserFragment();
                 default:
                     throw new RuntimeException();
             }

@@ -5,10 +5,15 @@ import android.util.Log;
 import com.example.readgroup.network.entity.BookEntity;
 import com.example.readgroup.network.entity.BookInfoResult;
 import com.example.readgroup.network.entity.BookResult;
+import com.example.readgroup.network.entity.FileResult;
 import com.example.readgroup.network.entity.LikeResult;
+import com.example.readgroup.network.entity.UserLikesResult;
 import com.example.readgroup.network.event.ChangeLikeEvent;
 import com.example.readgroup.network.event.GetBookInfoEvenet;
 import com.example.readgroup.network.event.GetBooksEvent;
+import com.example.readgroup.network.event.UpdateUserEvent;
+import com.example.readgroup.network.event.UploadFileEvent;
+import com.example.readgroup.network.event.UserLikeEvent;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -42,7 +47,7 @@ public class BombClient implements BombConst {
         return sInstance;
     }
 
-    private final OkHttpClient okhhtClinet;
+    private final OkHttpClient okhttpClinet;
     private final EventBus eventBus;
     private final Gson gson;
 
@@ -57,7 +62,7 @@ public class BombClient implements BombConst {
         });
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
-        okhhtClinet = new OkHttpClient.Builder()
+        okhttpClinet = new OkHttpClient.Builder()
                 .addInterceptor(new BombInterceptor())
                 .addNetworkInterceptor(loggingInterceptor)
                 .build();
@@ -84,6 +89,7 @@ public class BombClient implements BombConst {
                 }
                 BookResult bookResult = handleSuccessResponse(response, BookResult.class);
                 GetBooksEvent event = new GetBooksEvent(true, bookResult.getError(), bookResult.getData());
+                Log.i(TAG, "onResponse: ----------" + bookResult.getData());
                 eventBus.post(event);
             }
         });
@@ -96,11 +102,12 @@ public class BombClient implements BombConst {
      */
     public Call getBooksCall() {
         String url = String.format(BOOKS_URL, System.currentTimeMillis());
+        Log.i(TAG, "getBooksCall: --------" + url);
         Request requst = new Request
                 .Builder()
                 .url(url)
                 .build();
-        return okhhtClinet.newCall(requst);
+        return okhttpClinet.newCall(requst);
     }
 
     //------------------END-首页数据-----------------------------------------------------------------
@@ -111,10 +118,11 @@ public class BombClient implements BombConst {
     /**
      * 点击后异步获取图书的一个详情
      *
-     * @param objectId
+     * @param bookId
      */
-    public void asyncGetBookInfo(String objectId) {
-        Call call = getBooksDtialCall(objectId);
+    public void asyncGetBookInfo(String bookId) {
+        Call call = getBooksDtialCall(bookId);
+
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -123,17 +131,20 @@ public class BombClient implements BombConst {
             }
 
             @Override
-
             public void onResponse(Call call, Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    handleFailedReponse(response);
+                try {
+                    if (!response.isSuccessful()) {
+                        handleFailedReponse(response);
+                    }
+
+                    BookInfoResult result = handleSuccessResponse(response, BookInfoResult.class);
+
+                    GetBookInfoEvenet event = new GetBookInfoEvenet(result.getData().getLikes(),
+                            result.getData().getBook());
+                    eventBus.post(event);
+                } catch (IOException e) {
+                    onFailure(call, e);
                 }
-                BookInfoResult bookInfoResult = handleSuccessResponse(response, BookInfoResult.class);
-                GetBookInfoEvenet evenet = new GetBookInfoEvenet(bookInfoResult.getData().getLikes(),
-                        bookInfoResult.getData().getBook());
-                Log.i(TAG, "onResponse: ------" + bookInfoResult.getData().getLikes().size());
-                Log.i(TAG, "onResponse: ------" + bookInfoResult.getData().getLikes().toString());
-                eventBus.post(evenet);
             }
         });
     }
@@ -146,12 +157,11 @@ public class BombClient implements BombConst {
      */
     public Call getBooksDtialCall(String objectId) {
         String url = String.format(BOOK_INFO_URL, objectId, System.currentTimeMillis());
-        Request request = new Request
-                .Builder()
+
+        Request request = new Request.Builder()
                 .url(url)
                 .build();
-        Log.i(TAG, "getBooksDtialCall: -------------:" + url);
-        return okhhtClinet.newCall(request);
+        return okhttpClinet.newCall(request);
     }
     //------------------END图书详情----------------------------------------------------------------
 
@@ -159,6 +169,7 @@ public class BombClient implements BombConst {
     //---------------------START-----加入收藏或者取消收藏的-------------------------
     public void asyncChangLike(final boolean isLike, final BookEntity bookEntity, final String userId) {
         Call call = getBookLikeCall(bookEntity.getObjectId(), userId, isLike);
+
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -168,17 +179,25 @@ public class BombClient implements BombConst {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    handleFailedReponse(response);
+                try {
+                    if (!response.isSuccessful()) {
+                        handleFailedReponse(response);
+                    }
+
+                    LikeResult result = handleSuccessResponse(response, LikeResult.class);
+
+
+                    ChangeLikeEvent event;
+                    if (result.isSuccess()) {
+                        event = new ChangeLikeEvent(isLike, bookEntity);
+                    } else {
+                        event = new ChangeLikeEvent(isLike, result.getError());
+                    }
+
+                    eventBus.post(event);
+                } catch (IOException e) {
+                    onFailure(call, e);
                 }
-                LikeResult likeResult = handleSuccessResponse(response, LikeResult.class);
-                ChangeLikeEvent event;
-                if (likeResult.isSuccess()) {
-                    event = new ChangeLikeEvent(isLike, bookEntity);
-                } else {
-                    event = new ChangeLikeEvent(isLike, likeResult.getError());
-                }
-                eventBus.post(event);
             }
         });
     }
@@ -194,33 +213,45 @@ public class BombClient implements BombConst {
      */
     public Call getBookLikeCall(String bookId, String userId, boolean isLike) {
         String action = isLike ? "like" : "dislike";
+
         String url = String.format(BOOK_LIKE_URL, bookId, userId, action);
-        Request request = new Request
-                .Builder()
+        Request request = new Request.Builder()
                 .url(url)
                 .build();
-        return okhhtClinet.newCall(request);
+        return okhttpClinet.newCall(request);
     }
 
 
     //---------------------END-----加入收藏或者取消收藏的-------------------------
 
 
+    //-------------------------START---------------------------
     public void asyncUploadFile(File file) {
         Call call = getUploadFileCall(file);
+
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-
+                UploadFileEvent event = new UploadFileEvent(false, e.getMessage(), null);
+                eventBus.post(event);
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    if (!response.isSuccessful()) {
+                        handleFailedReponse(response);
+                    }
 
+                    FileResult fileResult = handleSuccessResponse(response, FileResult.class);
+                    UploadFileEvent event = new UploadFileEvent(true, null, fileResult.getUrl());
+                    eventBus.post(event);
+                } catch (IOException e) {
+                    onFailure(call, e);
+                }
             }
         });
     }
-
 
     /**
      * 上传文件的业务
@@ -230,14 +261,95 @@ public class BombClient implements BombConst {
      */
     public Call getUploadFileCall(File file) {
         RequestBody body = RequestBody.create(MediaType.parse("image/jpeg"), file);
-        Request request = new Request
-                .Builder()
+        Request request = new Request.Builder()
                 .url(UPLOAD_FILE_URL)
                 .post(body)
                 .build();
-        return okhhtClinet.newCall(request);
+        return okhttpClinet.newCall(request);
+    }
+    //-------------------------END上传文件的业务---------------------------
+
+    //------------------------Start-更新用户信息------------------------------
+
+    public void asyncUpdateUser(String id, final String avatar) {
+        Call call = getUpdateUserCall(id, avatar);
+
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                UpdateUserEvent event = new UpdateUserEvent(false, e.getMessage(), null);
+                eventBus.post(event);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    if (!response.isSuccessful()) {
+                        handleFailedReponse(response);
+                    }
+
+                    UpdateUserEvent event = new UpdateUserEvent(true, null, avatar);
+                    eventBus.post(event);
+                } catch (IOException e) {
+                    onFailure(call, e);
+                }
+            }
+        });
     }
 
+    public Call getUpdateUserCall(String id, String avatar) {
+        String url = String.format(UPDATE_USER_URL, id);
+
+        String content = "{\"avatar\":\"%s\"}";
+        content = String.format(content, avatar);
+        RequestBody body = RequestBody.create(MediaType.parse(CONTENT_TYPE_JSON), content);
+
+        Request request = new Request.Builder()
+                .url(url)
+                .put(body)
+                .build();
+        return okhttpClinet.newCall(request);
+    }
+    //------------------------END-更新用户信息------------------------------
+
+
+    //-----------------------------Start--获取用户收藏过得数据列表----------------------------------------
+    public void asyncGetUserLikes(String userId) {
+        Call call = getUserLikesCall(userId);
+
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                UserLikeEvent event = new UserLikeEvent(null, e.getMessage(), false);
+                eventBus.post(event);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    if (!response.isSuccessful()) {
+                        handleFailedReponse(response);
+                    }
+
+                    UserLikesResult result = handleSuccessResponse(response, UserLikesResult.class);
+
+                    UserLikeEvent event = new UserLikeEvent(result.getData(), result.getError(), result.isSuccess());
+                    eventBus.post(event);
+                } catch (IOException e) {
+                    onFailure(call, e);
+                }
+            }
+        });
+    }
+
+    public Call getUserLikesCall(String userId) {
+        String url = String.format(USER_LIKES_URL, userId, System.currentTimeMillis());
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+        return okhttpClinet.newCall(request);
+    }
+    //-----------------------------End--获取用户收藏过得数据列表----------------------------------------
 
     private void handleFailedReponse(Response response) throws IOException {
         String error = response.body().string();

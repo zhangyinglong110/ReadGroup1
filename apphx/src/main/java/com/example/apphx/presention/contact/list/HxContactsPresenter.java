@@ -22,7 +22,7 @@ public class HxContactsPresenter extends MvpPresenter<HxContactsView> {
 
     //---------联系人列表的业务的开始执行----------
     public void loadContacts() {
-        HxContactManager.getInstance().getContacts();
+        HxContactManager.getInstance().retrieveContacts();
     }
 
     public void deleteContact(String hxId) {

@@ -4,6 +4,7 @@ import com.example.apphx.model.event.HxNewMsgEvent;
 import com.hyphenate.EMMessageListener;
 import com.hyphenate.chat.EMChatManager;
 import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMCmdMessageBody;
 import com.hyphenate.chat.EMMessage;
 
 import org.greenrobot.eventbus.EventBus;
@@ -20,6 +21,8 @@ public class HxMessageManager implements EMMessageListener {
     private static HxMessageManager sInstace;
     private final EventBus eventBus;
     private final EMChatManager emChatManager;
+    private static final String CMD_ATTRIBUTE_AVATAR = "AVATAR";
+    private static final String CMD_ACTION_UPDATE_AVATAR = "CMD_ACTION_UPDATE_AVATAR";
 
 
     /**
@@ -84,4 +87,24 @@ public class HxMessageManager implements EMMessageListener {
 
 
     //----------------end EMMessageListener -----------------------------------------
+
+
+    /**
+     * 当用户更改其头像后，要通过此方法将新头像的信息透传给他的所有好友。
+     *
+     * @param avatar 用户新头像的地址
+     */
+    public void sendAvatarUpdateMessage(String avatar) {
+        EMMessage cmdMsg = EMMessage.createSendMessage(EMMessage.Type.CMD);
+        cmdMsg.setAttribute(CMD_ATTRIBUTE_AVATAR, avatar);
+        cmdMsg.setChatType(EMMessage.ChatType.Chat);
+        EMCmdMessageBody body = new EMCmdMessageBody(CMD_ACTION_UPDATE_AVATAR);
+        cmdMsg.addBody(body);
+
+        for (String id : HxContactManager.getInstance().getContacts()) {
+            cmdMsg.setReceipt(id);
+            // 此方法是异步的
+            emChatManager.sendMessage(cmdMsg);
+        }
+    }
 }

@@ -1,14 +1,10 @@
 package com.example.readgroup.presentation.user.user;
 
+
 import com.example.apphx.basemvp.MvpView;
 import com.example.readgroup.network.entity.BookEntity;
 
 import java.util.List;
-
-/**
- * 用户中心的视图表现层
- * Created by Administrator on 2016/11/15 0015.
- */
 
 public interface UserView extends MvpView {
 
@@ -18,7 +14,7 @@ public interface UserView extends MvpView {
 
     void stopLoading();
 
-    void showUpdateAvararFail(String msg);
+    void showUpdateAvatarFail(String msg);
 
     void setBooks(List<BookEntity> books);
 
@@ -29,37 +25,30 @@ public interface UserView extends MvpView {
     UserView NULL = new UserView() {
         @Override
         public void refreshUser(String hxId) {
-
         }
 
         @Override
         public void startLoading() {
-
         }
 
         @Override
         public void stopLoading() {
-
         }
 
         @Override
-        public void showUpdateAvararFail(String msg) {
-
+        public void showUpdateAvatarFail(String msg) {
         }
 
         @Override
         public void setBooks(List<BookEntity> books) {
-
         }
 
         @Override
         public void setRefreshing(boolean refreshing) {
-
         }
 
         @Override
         public void showRefreshFail(String msg) {
-
         }
     };
 }

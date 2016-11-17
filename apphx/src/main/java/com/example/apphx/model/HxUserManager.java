@@ -143,7 +143,7 @@ public class HxUserManager implements EMConnectionListener {
     /**
      * 等出功能
      */
-    public void asyncLogout(String hxId) {
+    public void asyncLogout() {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -157,4 +157,6 @@ public class HxUserManager implements EMConnectionListener {
     public String getCurrentUserId() {
         return currentUserId;
     }
+
+
 }
